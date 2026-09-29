@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Library Book Management System Using Structures - Academic First-Year Project with C struct Book demonstration, dashboard, inventory, and free web deployment.">
+    <meta name="author" content="First-Year Engineering Academic Project">
+    <title>Library Book Management System | Using Structures</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="light">
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Main App Container -->
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h2>LibStruct</h2>
+                        <span class="badge-academic">C Struct Edition</span>
+                    </div>
+                </div>
+                <button class="btn-icon mobile-close-btn" id="mobileCloseSidebar" aria-label="Close menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user-pill">
+                <div class="user-avatar">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div class="user-meta">
+                    <span class="user-role" id="currentRoleDisplay">Librarian Admin</span>
+                    <span class="user-status"><span class="status-dot"></span> Active Session</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">CORE MENU</div>
+                <button class="nav-item active" data-view="dashboard" id="navDashboard">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-view="inventory" id="navInventory">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Book Inventory</span>
+                    <span class="nav-badge" id="navTotalBadge">0</span>
+                </button>
+                <button class="nav-item" data-view="add-book" id="navAddBook">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    <span>Add New Book</span>
+                </button>
+                <button class="nav-item" data-view="issue-return" id="navIssueReturn">
+                    <i class="fa-solid fa-right-left"></i>
+                    <span>Issue & Return Desk</span>
+                </button>
+
+                <div class="nav-section-label">ACADEMIC & VIVA</div>
+                <button class="nav-item" data-view="c-struct-view" id="navCStruct">
+                    <i class="fa-solid fa-code"></i>
+                    <span>struct Book Visualizer</span>
+                </button>
+                <button class="nav-item" data-view="academic-guide" id="navGuide">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Viva Voce & Guide</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="c-badge-card">
+                    <div class="c-badge-header">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>C Backend Ready</span>
+                    </div>
+                    <p class="c-badge-text">Demonstrating <code>struct Book</code> memory model & file I/O</p>
+                </div>
+                <button class="btn-sidebar-secondary" id="btnResetData" title="Reset to default college books">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset Sample Data
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn-icon sidebar-toggle-btn" id="mobileOpenSidebar" aria-label="Toggle navigation">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="breadcrumbs">
+                        <span class="crumb-parent">System</span>
+                        <i class="fa-solid fa-chevron-right crumb-sep"></i>
+                        <span class="crumb-current" id="pageTitleBreadcrumb">Dashboard</span>
+                    </div>
+                </div>
+
+                <div class="topbar-search">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="globalSearchInput" placeholder="Quick search by ID, title, or author (Press '/' to focus)..." autocomplete="off">
+                    <kbd class="search-kbd">/</kbd>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="live-clock" id="liveClock" title="Current Academic Session Time">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="clockTime">--:--:--</span>
+                    </div>
+
+                    <button class="btn-icon theme-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Theme" aria-label="Toggle Theme">
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
+                    </button>
+
+                    <button class="btn-primary-sm" id="btnQuickAddTop">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>New Book</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Dynamic Content Views -->
+            <main class="content-body">
+                
+                <!-- =========================================================
+                     VIEW 1: DASHBOARD
+                     ========================================================= -->
+                <section class="view-panel active" id="view-dashboard">
+                    <!-- Academic Banner -->
+                    <div class="academic-hero-banner">
+                        <div class="hero-content">
+                            <span class="hero-tag"><i class="fa-solid fa-award"></i> First-Year Academic Project</span>
+                            <h1 class="hero-title">Library Book Management System Using Structures</h1>
+                            <p class="hero-desc">
+                                A complete system modeling the academic C <code>struct Book</code> entity with real-time inventory management, issue/return transactions, and dynamic statistics.
+                            </p>
+                            <div class="hero-actions">
+                                <button class="btn-banner-primary" id="heroBtnAddBook">
+                                    <i class="fa-solid fa-circle-plus"></i> Add New Book
+                                </button>
+                                <button class="btn-banner-outline" id="heroBtnViewC">
+                                    <i class="fa-solid fa-code"></i> Inspect C Structure
+                                </button>
+                                <button class="btn-banner-outline" id="heroBtnExportData">
+                                    <i class="fa-solid fa-file-arrow-down"></i> Backup / Export JSON
+                                </button>
+                            </div>
+                        </div>
+                        <div class="hero-c-card">
+                            <div class="c-code-header">
+                                <span><i class="fa-solid fa-file-code"></i> struct Book Definition</span>
+                                <span class="badge-lang">C99</span>
+                            </div>
+                            <pre class="c-code-snippet"><code><span class="tok-kw">struct</span> <span class="tok-type">Book</span> {
+    <span class="tok-type">int</span>   <span class="tok-var">bookId</span>;
+    <span class="tok-type">char</span>  <span class="tok-var">title</span>[100];
+    <span class="tok-type">char</span>  <span class="tok-var">author</span>[100];
+    <span class="tok-type">float</span> <span class="tok-var">price</span>;
+    <span class="tok-type">int</span>   <span class="tok-var">quantity</span>;
+    <span class="tok-type">int</span>   <span class="tok-var">availableQuantity</span>;
+};</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 4 Metric Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper bg-indigo">
+                                <i class="fa-solid fa-book"></i>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Unique Book Titles</span>
+                                <h3 class="stat-value" id="statUniqueTitles">0</h3>
+                                <span class="stat-meta text-muted" id="statMaxCapacity">Records in system</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper bg-blue">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Total Book Copies</span>
+                                <h3 class="stat-value" id="statTotalCopies">0</h3>
+                                <span class="stat-meta text-success"><i class="fa-solid fa-cubes"></i> Total physical stock</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper bg-emerald">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Available on Shelf</span>
+                                <h3 class="stat-value" id="statAvailableCopies">0</h3>
+                                <span class="stat-meta text-emerald" id="statAvailablePercent">0% in stock</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper bg-amber">
+                                <i class="fa-solid fa-hand-holding-hand"></i>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Currently Issued</span>
+                                <h3 class="stat-value" id="statIssuedCopies">0</h3>
+                                <span class="stat-meta text-amber" id="statIssuedPercent">0% borrowed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Middle Section: Quick Operations + Stock Gauge -->
+                    <div class="dashboard-grid">
+                        <!-- Inventory Distribution & Progress -->
+                        <div class="card panel-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-chart-pie text-indigo"></i>
+                                    <h3>Library Inventory Breakdown</h3>
+                                </div>
+                                <span class="badge-pill" id="badgeStockStatus">Balanced</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="progress-segment-bar">
+                                    <div class="seg-avail" id="barAvailSeg" style="width: 70%;" title="Available Copies"></div>
+                                    <div class="seg-issued" id="barIssuedSeg" style="width: 30%;" title="Issued Copies"></div>
+                                </div>
+                                <div class="progress-legend">
+                                    <div class="legend-item">
+                                        <span class="dot dot-avail"></span>
+                                        <span class="legend-label">Available on Shelf:</span>
+                                        <strong id="legendAvailCount">0</strong>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="dot dot-issued"></span>
+                                        <span class="legend-label">Issued / With Students:</span>
+                                        <strong id="legendIssuedCount">0</strong>
+                                    </div>
+                                </div>
+
+                                <hr class="card-divider">
+
+                                <div class="financial-summary">
+                                    <div class="fin-item">
+                                        <span class="fin-label">Estimated Inventory Value</span>
+                                        <span class="fin-value" id="statTotalValuation">$0.00</span>
+                                    </div>
+                                    <div class="fin-item">
+                                        <span class="fin-label">Low Stock Alerts (< 2 copies)</span>
+                                        <span class="fin-value text-danger" id="statLowStockCount">0 Titles</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions Desk -->
+                        <div class="card panel-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-bolt text-amber"></i>
+                                    <h3>Fast Desk Operations</h3>
+                                </div>
+                                <span class="text-muted text-sm">One-click actions</span>
+                            </div>
+                            <div class="card-body quick-actions-grid">
+                                <button class="action-tile" id="dashQuickIssueBtn">
+                                    <div class="action-icon icon-issue">
+                                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        <strong>Issue Book</strong>
+                                        <span>Student borrow checkout</span>
+                                    </div>
+                                </button>
+
+                                <button class="action-tile" id="dashQuickReturnBtn">
+                                    <div class="action-icon icon-return">
+                                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        <strong>Return Book</strong>
+                                        <span>Check in returned copy</span>
+                                    </div>
+                                </button>
+
+                                <button class="action-tile" id="dashQuickAddBtn">
+                                    <div class="action-icon icon-add">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        <strong>Add New Book</strong>
+                                        <span>Register new struct Book</span>
+                                    </div>
+                                </button>
+
+                                <button class="action-tile" id="dashViewAvailBtn">
+                                    <div class="action-icon icon-inspect">
+                                        <i class="fa-solid fa-filter"></i>
+                                    </div>
+                                    <div class="action-text">
+                                        <strong>Available Books</strong>
+                                        <span>Filter ready to borrow</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Books & Activity Preview -->
+                    <div class="card panel-card mt-4">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-clock-rotate-left text-blue"></i>
+                                <h3>Recently Updated Books</h3>
+                            </div>
+                            <button class="btn-ghost-sm" id="btnSeeAllInventory">View All Inventory <i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table" id="dashboardRecentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Book ID</th>
+                                        <th>Title & Author</th>
+                                        <th>Price</th>
+                                        <th>Total Qty</th>
+                                        <th>Available</th>
+                                        <th>Status</th>
+                                        <th>Quick Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboardRecentTbody">
+                                    <!-- Populated dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     VIEW 2: INVENTORY (ALL BOOKS & SEARCH / FILTER)
+                     ========================================================= -->
+                <section class="view-panel" id="view-inventory">
+                    <div class="page-heading-row">
+                        <div>
+                            <h2 class="page-heading">Book Inventory Catalog</h2>
+                            <p class="page-subheading">Manage, search, issue, return, edit and delete library book records.</p>
+                        </div>
+                        <div class="heading-actions">
+                            <button class="btn-outline" id="btnExportCSV">
+                                <i class="fa-solid fa-file-csv"></i> Export CSV
+                            </button>
+                            <button class="btn-primary" id="btnInventoryAddBook">
+                                <i class="fa-solid fa-plus"></i> Add New Book
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Toolbar: Search, Filter, Sort -->
+                    <div class="inventory-toolbar">
+                        <div class="search-input-group">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="inventorySearchInput" placeholder="Search by Book ID, Title, or Author..." autocomplete="off">
+                            <button class="btn-clear-search" id="btnClearSearch" title="Clear search" style="display:none;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <div class="filter-controls">
+                            <!-- Filter by Status -->
+                            <div class="select-wrapper">
+                                <label for="filterStatusSelect"><i class="fa-solid fa-filter"></i></label>
+                                <select id="filterStatusSelect">
+                                    <option value="ALL">All Books</option>
+                                    <option value="AVAILABLE">Available Only (>0)</option>
+                                    <option value="OUT_OF_STOCK">Out of Stock (=0)</option>
+                                    <option value="LOW_STOCK">Low Stock (≤ 2)</option>
+                                </select>
+                            </div>
+
+                            <!-- Sort Options -->
+                            <div class="select-wrapper">
+                                <label for="sortSelect"><i class="fa-solid fa-arrow-down-wide-short"></i></label>
+                                <select id="sortSelect">
+                                    <option value="ID_ASC">ID (Ascending)</option>
+                                    <option value="ID_DESC">ID (Descending)</option>
+                                    <option value="TITLE_ASC">Title (A-Z)</option>
+                                    <option value="PRICE_ASC">Price (Low to High)</option>
+                                    <option value="PRICE_DESC">Price (High to Low)</option>
+                                    <option value="AVAIL_DESC">Available (High to Low)</option>
+                                </select>
+                            </div>
+
+                            <!-- View Toggle: Table or Grid -->
+                            <div class="view-toggle-btns">
+                                <button class="btn-toggle active" id="btnViewTable" title="Table View">
+                                    <i class="fa-solid fa-table-list"></i>
+                                </button>
+                                <button class="btn-toggle" id="btnViewGrid" title="Card Grid View">
+                                    <i class="fa-solid fa-grip"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Search Filter Pills -->
+                    <div class="active-filter-bar" id="activeFilterBar" style="display: none;">
+                        <span class="filter-count-text" id="filterCountText">Showing matching results</span>
+                        <button class="btn-reset-filters" id="btnResetFilters">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Filters
+                        </button>
+                    </div>
+
+                    <!-- Main Books Table View -->
+                    <div class="card table-card" id="tableViewContainer">
+                        <div class="table-responsive">
+                            <table class="custom-table" id="inventoryTable">
+                                <thead>
+                                    <tr>
+                                        <th class="th-id">ID</th>
+                                        <th class="th-title">Book Title</th>
+                                        <th class="th-author">Author</th>
+                                        <th class="th-price">Price</th>
+                                        <th class="th-qty">Total Qty</th>
+                                        <th class="th-avail">Available</th>
+                                        <th class="th-status">Status</th>
+                                        <th class="th-actions text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryTbody">
+                                    <!-- Dynamically filled -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div class="empty-state" id="inventoryEmptyState" style="display: none;">
+                            <div class="empty-icon">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                            <h3>No Books Found</h3>
+                            <p id="emptyStateMsg">No books match your current search query or filter selection.</p>
+                            <button class="btn-primary-sm" id="emptyStateResetBtn">
+                                <i class="fa-solid fa-rotate-left"></i> Clear Search / Filter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card Grid View Container -->
+                    <div class="books-grid-container" id="gridViewContainer" style="display: none;">
+                        <!-- Dynamically filled with book cards -->
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     VIEW 3: ADD BOOK FORM
+                     ========================================================= -->
+                <section class="view-panel" id="view-add-book">
+                    <div class="page-heading-row">
+                        <div>
+                            <h2 class="page-heading">Add New Book Record</h2>
+                            <p class="page-subheading">Register a new book into the library structure database with full validation.</p>
+                        </div>
+                    </div>
+
+                    <div class="add-book-grid">
+                        <div class="card form-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-square-plus text-indigo"></i>
+                                    <h3>Book Specification Form</h3>
+                                </div>
+                                <span class="badge-academic"><code>struct Book</code> Schema</span>
+                            </div>
+
+                            <form id="addBookForm" class="custom-form" novalidate>
+                                <div class="form-row-2">
+                                    <!-- Book ID -->
+                                    <div class="form-group">
+                                        <label for="inputBookId">
+                                            Book ID <span class="required">*</span>
+                                            <span class="field-hint">(Positive Integer, e.g. 106)</span>
+                                        </label>
+                                        <div class="input-with-icon">
+                                            <i class="fa-solid fa-hashtag input-icon"></i>
+                                            <input type="number" id="inputBookId" min="1" step="1" placeholder="e.g. 106" required>
+                                        </div>
+                                        <div class="field-error" id="errBookId"></div>
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="form-group">
+                                        <label for="inputPrice">
+                                            Price ($) <span class="required">*</span>
+                                            <span class="field-hint">(Positive Decimal, e.g. 49.99)</span>
+                                        </label>
+                                        <div class="input-with-icon">
+                                            <i class="fa-solid fa-dollar-sign input-icon"></i>
+                                            <input type="number" id="inputPrice" min="0" step="0.01" placeholder="e.g. 49.99" required>
+                                        </div>
+                                        <div class="field-error" id="errPrice"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Book Title -->
+                                <div class="form-group">
+                                    <label for="inputTitle">
+                                        Book Title <span class="required">*</span>
+                                        <span class="field-hint">(Max 100 chars - struct Book.title)</span>
+                                    </label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-book input-icon"></i>
+                                        <input type="text" id="inputTitle" maxlength="100" placeholder="e.g. Master Algorithms in C" required>
+                                    </div>
+                                    <div class="field-error" id="errTitle"></div>
+                                </div>
+
+                                <!-- Author -->
+                                <div class="form-group">
+                                    <label for="inputAuthor">
+                                        Author Name <span class="required">*</span>
+                                        <span class="field-hint">(Max 100 chars - struct Book.author)</span>
+                                    </label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-feather-pointed input-icon"></i>
+                                        <input type="text" id="inputAuthor" maxlength="100" placeholder="e.g. Robert Sedgewick" required>
+                                    </div>
+                                    <div class="field-error" id="errAuthor"></div>
+                                </div>
+
+                                <!-- Total Quantity -->
+                                <div class="form-group">
+                                    <label for="inputQuantity">
+                                        Total Number of Copies <span class="required">*</span>
+                                        <span class="field-hint">(Integer >= 1)</span>
+                                    </label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-layer-group input-icon"></i>
+                                        <input type="number" id="inputQuantity" min="1" step="1" value="5" placeholder="e.g. 5" required>
+                                    </div>
+                                    <span class="input-note">Note: Available quantity will automatically be set equal to Total Quantity initially.</span>
+                                    <div class="field-error" id="errQuantity"></div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="form-actions">
+                                    <button type="button" class="btn-outline" id="btnResetAddForm">
+                                        <i class="fa-solid fa-arrow-rotate-left"></i> Reset Form
+                                    </button>
+                                    <button type="submit" class="btn-primary" id="btnSubmitAddBook">
+                                        <i class="fa-solid fa-plus"></i> Add Book to Library
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Live C Struct Code Preview on Right -->
+                        <div class="card c-preview-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-memory text-emerald"></i>
+                                    <h3>Live C Struct Memory Representation</h3>
+                                </div>
+                                <span class="badge-lang">Live Preview</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-sm text-muted mb-2">
+                                    As you fill the form above, this shows how your inputs translate into a real C language <code>struct Book</code> initialization:
+                                </p>
+                                <pre class="c-live-code"><code id="liveCStructCode">// C struct instantiation:
+struct Book newBook = {
+    .bookId = 106,
+    .title = "Master Algorithms in C",
+    .author = "Robert Sedgewick",
+    .price = 49.99f,
+    .quantity = 5,
+    .availableQuantity = 5
+};</code></pre>
+                                
+                                <div class="c-struct-explanation">
+                                    <h4><i class="fa-solid fa-circle-info"></i> How C Stores This Record:</h4>
+                                    <ul class="c-mem-list">
+                                        <li><code>bookId</code> (4 bytes integer): Primary key</li>
+                                        <li><code>title[100]</code> (100 bytes char array): String buffer</li>
+                                        <li><code>author[100]</code> (100 bytes char array): String buffer</li>
+                                        <li><code>price</code> (4 bytes float): Cost value</li>
+                                        <li><code>quantity</code> (4 bytes int): Total physical copies</li>
+                                        <li><code>availableQuantity</code> (4 bytes int): Ready to issue</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     VIEW 4: ISSUE & RETURN DESK
+                     ========================================================= -->
+                <section class="view-panel" id="view-issue-return">
+                    <div class="page-heading-row">
+                        <div>
+                            <h2 class="page-heading">Issue & Return Transaction Desk</h2>
+                            <p class="page-subheading">Manage student lending, calculate available inventory, and log library circulation.</p>
+                        </div>
+                    </div>
+
+                    <div class="issue-return-grid">
+                        <!-- Issue Book Card -->
+                        <div class="card desk-card">
+                            <div class="card-header header-issue">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-indigo"></i>
+                                    <h3>Issue Book to Student</h3>
+                                </div>
+                                <span class="badge-pill badge-issue">Borrow Check-out</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-sm text-muted mb-3">
+                                    Select or enter a Book ID to issue. Available quantity will be decremented by 1.
+                                </p>
+                                <form id="issueFormDesk" class="custom-form">
+                                    <div class="form-group">
+                                        <label for="selectIssueBook">Select Book to Issue <span class="required">*</span></label>
+                                        <select id="selectIssueBook" required>
+                                            <option value="">-- Choose a book --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputStudentName">Student / Borrower Name (Optional)</label>
+                                        <input type="text" id="inputStudentName" placeholder="e.g. Alex Johnson (Roll No: 24CS101)">
+                                    </div>
+                                    <button type="submit" class="btn-primary w-full" id="btnSubmitIssueDesk">
+                                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Confirm Issue Book
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Return Book Card -->
+                        <div class="card desk-card">
+                            <div class="card-header header-return">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-arrow-down-left-and-up-right-to-center text-emerald"></i>
+                                    <h3>Return Issued Book</h3>
+                                </div>
+                                <span class="badge-pill badge-return">Check-in Deposit</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-sm text-muted mb-3">
+                                    Select or enter a Book ID to return. Available quantity will be incremented by 1.
+                                </p>
+                                <form id="returnFormDesk" class="custom-form">
+                                    <div class="form-group">
+                                        <label for="selectReturnBook">Select Book to Return <span class="required">*</span></label>
+                                        <select id="selectReturnBook" required>
+                                            <option value="">-- Choose an issued book --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputReturnNotes">Return Remarks (Optional)</label>
+                                        <input type="text" id="inputReturnNotes" placeholder="e.g. Good condition / Regular return">
+                                    </div>
+                                    <button type="submit" class="btn-emerald w-full" id="btnSubmitReturnDesk">
+                                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Confirm Return Book
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Circulation History -->
+                    <div class="card panel-card mt-4">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-list-check text-blue"></i>
+                                <h3>Session Circulation Log</h3>
+                            </div>
+                            <button class="btn-ghost-sm" id="btnClearHistoryBtn">
+                                <i class="fa-solid fa-trash-can"></i> Clear History
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table" id="transactionTable">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Action</th>
+                                        <th>Book ID</th>
+                                        <th>Book Title</th>
+                                        <th>Borrower / Details</th>
+                                        <th>Available Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionTbody">
+                                    <!-- Dynamically filled with transaction entries -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     VIEW 5: C STRUCT VISUALIZER (ACADEMIC VIVA HIGHLIGHT)
+                     ========================================================= -->
+                <section class="view-panel" id="view-c-struct-view">
+                    <div class="page-heading-row">
+                        <div>
+                            <h2 class="page-heading">C Structure (<code>struct Book</code>) Visualizer</h2>
+                            <p class="page-subheading">Interactive academic demonstration of how C structures represent each book in memory and files.</p>
+                        </div>
+                    </div>
+
+                    <div class="c-visualizer-grid">
+                        <!-- Left: Book Selector & C Code Representation -->
+                        <div class="card panel-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-code text-indigo"></i>
+                                    <h3>Selected Book as C Structure</h3>
+                                </div>
+                                <div class="select-wrapper-sm">
+                                    <select id="selectVisualizerBook">
+                                        <!-- Dynamically filled -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="c-code-box">
+                                    <div class="c-code-toolbar">
+                                        <span><i class="fa-brands fa-c"></i> C99 Structure Instance</span>
+                                        <button class="btn-copy-code" id="btnCopyCCode" title="Copy C Code">
+                                            <i class="fa-regular fa-copy"></i> Copy Code
+                                        </button>
+                                    </div>
+                                    <pre class="c-code-snippet"><code id="codeVisualizerOutput">// Select a book to inspect its C struct representation</code></pre>
+                                </div>
+
+                                <div class="mt-4">
+                                    <h4 class="mb-2"><i class="fa-solid fa-diagram-project"></i> Memory Byte Map Breakdown:</h4>
+                                    <div class="memory-map-table-wrap">
+                                        <table class="mem-map-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Field Name</th>
+                                                    <th>C Data Type</th>
+                                                    <th>Size (Bytes)</th>
+                                                    <th>Value in Memory</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="memMapTbody">
+                                                <!-- Dynamically populated -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Academic Concept Breakdown & File I/O Logic -->
+                        <div class="card panel-card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fa-solid fa-lightbulb text-amber"></i>
+                                    <h3>Why We Use Structures in C</h3>
+                                </div>
+                            </div>
+                            <div class="card-body academic-notes">
+                                <div class="note-card">
+                                    <h4><i class="fa-solid fa-layer-group text-indigo"></i> 1. Heterogeneous Data Grouping</h4>
+                                    <p>Unlike arrays that can only store elements of the same data type, a C <code>struct</code> allows grouping different data types (e.g., <code>int</code> for ID, <code>char[]</code> for title, <code>float</code> for price) into a single logical entity named <code>Book</code>.</p>
+                                </div>
+
+                                <div class="note-card">
+                                    <h4><i class="fa-solid fa-floppy-disk text-emerald"></i> 2. Direct Binary File I/O</h4>
+                                    <p>With structures, an entire book record can be read or written to disk in a single line of code using <code>fwrite(&book, sizeof(struct Book), 1, fp);</code> and <code>fread()</code>.</p>
+                                </div>
+
+                                <div class="note-card">
+                                    <h4><i class="fa-solid fa-bars-staggered text-blue"></i> 3. Array of Structures</h4>
+                                    <p>We declare <code>struct Book library[MAX_BOOKS];</code> to manage up to 200 books dynamically in contiguous memory, enabling fast linear/binary searching and indexed sorting.</p>
+                                </div>
+
+                                <div class="note-card">
+                                    <h4><i class="fa-solid fa-arrows-split-up-and-left text-amber"></i> 4. Pass-by-Pointer Efficiency</h4>
+                                    <p>When displaying or updating books, passing <code>const struct Book* b</code> via pointers avoids unnecessary memory copying and improves execution speed.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- =========================================================
+                     VIEW 6: ACADEMIC GUIDE & VIVA VOCE
+                     ========================================================= -->
+                <section class="view-panel" id="view-academic-guide">
+                    <div class="page-heading-row">
+                        <div>
+                            <h2 class="page-heading">Academic Guide & Viva Voce Q&A</h2>
+                            <p class="page-subheading">Comprehensive preparation guide for practical laboratory evaluations and project defense.</p>
+                        </div>
+                        <a href="c-program/library_management.c" download="library_management.c" class="btn-primary">
+                            <i class="fa-solid fa-download"></i> Download library_management.c
+                        </a>
+                    </div>
+
+                    <div class="guide-accordion-container">
+                        <!-- Viva Question 1 -->
+                        <div class="accordion-item open">
+                            <button class="accordion-header">
+                                <span><strong>Q1: What is a structure in C, and why is it used in this project?</strong></span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="accordion-body">
+                                <p><strong>Answer:</strong> A structure in C (defined with the <code>struct</code> keyword) is a user-defined data type that allows grouping variables of different data types under a single name.</p>
+                                <p>In this Library Management System, a book has multiple attributes of mixed types (integer ID, text title, text author, float price, integer quantity). A structure binds these related properties together into a single cohesive <code>struct Book</code> entity.</p>
+                            </div>
+                        </div>
+
+                        <!-- Viva Question 2 -->
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span><strong>Q2: How do you declare an array of structures, and what is its purpose?</strong></span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="accordion-body">
+                                <p><strong>Answer:</strong> An array of structures is declared as:</p>
+                                <pre class="c-code-snippet"><code>struct Book library[MAX_BOOKS];</code></pre>
+                                <p>It allows storing multiple book records sequentially in memory. We can access the i-th book's attributes using the dot operator (e.g., <code>library[i].bookId</code>, <code>library[i].title</code>).</p>
+                            </div>
+                        </div>
+
+                        <!-- Viva Question 3 -->
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span><strong>Q3: How does the system validate book issuance and returns?</strong></span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="accordion-body">
+                                <ul>
+                                    <li><strong>Issue Validation:</strong> Before issuing a book, the program verifies if <code>availableQuantity > 0</code>. If it equals 0, the operation is rejected with an "Out of Stock" message.</li>
+                                    <li><strong>Return Validation:</strong> Before returning a book, the program verifies if <code>availableQuantity < quantity</code>. If it is already equal to total quantity, the operation is blocked to prevent extra phantom copies.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Viva Question 4 -->
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span><strong>Q4: How does file persistence work in the C program?</strong></span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="accordion-body">
+                                <p>The C program uses binary file I/O functions:</p>
+                                <ul>
+                                    <li><code>fopen("library_books.dat", "wb")</code> to open in write-binary mode.</li>
+                                    <li><code>fwrite(&bookCount, sizeof(int), 1, fp);</code> to save the record count.</li>
+                                    <li><code>fwrite(library, sizeof(struct Book), bookCount, fp);</code> to write all structures in one atomic operation.</li>
+                                    <li><code>fread()</code> during startup to reload records from disk into memory.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Viva Question 5 -->
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span><strong>Q5: How does the Web application complement the C program?</strong></span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="accordion-body">
+                                <p>The Web application provides a modern, responsive user interface deployable on free hosting (GitHub Pages / Vercel / Netlify) while strictly adhering to the exact same <code>struct Book</code> data schema, business logic, validation rules, and local persistence via <code>localStorage</code>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Footer -->
+            <footer class="app-footer">
+                <div class="footer-left">
+                    <span><strong>LIBRARY BOOK MANAGEMENT SYSTEM USING STRUCTURES</strong></span>
+                    <span class="footer-sep">|</span>
+                    <span>Academic Project for First-Year College</span>
+                </div>
+                <div class="footer-right">
+                    <span class="badge-status-online"><span class="status-dot"></span> Ready for Evaluation</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MODALS
+         ========================================================= -->
+
+    <!-- Edit Book Modal -->
+    <div class="modal-backdrop" id="editModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-pen-to-square text-indigo"></i>
+                    <h3>Edit Book Record</h3>
+                </div>
+                <button class="btn-icon modal-close-btn" id="btnCancelEdit" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="editBookForm" class="custom-form">
+                <div class="modal-body">
+                    <input type="hidden" id="editOriginalId">
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="editBookId">Book ID <span class="field-hint">(Cannot change ID)</span></label>
+                            <input type="number" id="editBookId" disabled class="input-disabled">
+                        </div>
+                        <div class="form-group">
+                            <label for="editPrice">Price ($) <span class="required">*</span></label>
+                            <input type="number" id="editPrice" min="0" step="0.01" required>
+                            <div class="field-error" id="errEditPrice"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTitle">Book Title <span class="required">*</span></label>
+                        <input type="text" id="editTitle" maxlength="100" required>
+                        <div class="field-error" id="errEditTitle"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editAuthor">Author <span class="required">*</span></label>
+                        <input type="text" id="editAuthor" maxlength="100" required>
+                        <div class="field-error" id="errEditAuthor"></div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="editQuantity">Total Quantity <span class="required">*</span></label>
+                            <input type="number" id="editQuantity" min="1" required>
+                            <div class="field-error" id="errEditQuantity"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAvailable">Available Quantity <span class="required">*</span></label>
+                            <input type="number" id="editAvailable" min="0" required>
+                            <div class="field-error" id="errEditAvailable"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-outline" id="btnCancelEditModal">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnSaveEdit">
+                        <i class="fa-solid fa-check"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-backdrop" id="deleteModal">
+        <div class="modal-dialog modal-dialog-sm">
+            <div class="modal-header header-danger">
+                <div class="modal-title">
+                    <i class="fa-solid fa-triangle-exclamation text-danger"></i>
+                    <h3>Confirm Delete Book</h3>
+                </div>
+                <button class="btn-icon modal-close-btn" id="btnCancelDeleteX" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete this book from the library database?</p>
+                <div class="delete-book-preview" id="deleteBookPreview">
+                    <strong id="deleteBookTitle">--</strong>
+                    <span id="deleteBookMeta" class="text-muted text-sm">--</span>
+                </div>
+                <p class="text-danger text-sm mt-2"><i class="fa-solid fa-circle-exclamation"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-outline" id="btnCancelDelete">Cancel</button>
+                <button type="button" class="btn-danger" id="btnConfirmDelete">
+                    <i class="fa-solid fa-trash"></i> Yes, Delete Book
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Issue Modal -->
+    <div class="modal-backdrop" id="quickIssueModal">
+        <div class="modal-dialog modal-dialog-sm">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-indigo"></i>
+                    <h3>Issue Book</h3>
+                </div>
+                <button class="btn-icon modal-close-btn" id="btnCancelQuickIssueX" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="quickIssueForm">
+                <div class="modal-body">
+                    <div class="selected-book-callout">
+                        <div class="book-mini-title" id="quickIssueBookTitle">--</div>
+                        <div class="book-mini-meta" id="quickIssueBookMeta">Available: 0 / Total: 0</div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="quickIssueStudent">Student / Borrower Name (Optional)</label>
+                        <input type="text" id="quickIssueStudent" placeholder="e.g. Emily Davis (CSE)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-outline" id="btnCancelQuickIssue">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnConfirmQuickIssue">
+                        <i class="fa-solid fa-check"></i> Issue 1 Copy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Backup & Export / Import Modal -->
+    <div class="modal-backdrop" id="backupModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-database text-indigo"></i>
+                    <h3>Backup, Export & Import Data</h3>
+                </div>
+                <button class="btn-icon modal-close-btn" id="btnCancelBackupX" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="backup-options">
+                    <div class="backup-box">
+                        <h4><i class="fa-solid fa-file-arrow-down text-emerald"></i> Export Database (JSON)</h4>
+                        <p class="text-sm text-muted">Download all books and records as a portable JSON file.</p>
+                        <button class="btn-outline w-full mt-2" id="btnModalExportJSON">
+                            <i class="fa-solid fa-download"></i> Download JSON Backup
+                        </button>
+                    </div>
+                    <div class="backup-box">
+                        <h4><i class="fa-solid fa-file-arrow-up text-blue"></i> Import Database (JSON)</h4>
+                        <p class="text-sm text-muted">Restore library data from an existing JSON backup file.</p>
+                        <input type="file" id="importFileInput" accept=".json" style="display:none;">
+                        <button class="btn-outline w-full mt-2" id="btnModalImportJSON">
+                            <i class="fa-solid fa-upload"></i> Upload JSON File
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-outline" id="btnCancelBackup">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>
